@@ -30,22 +30,33 @@ let rec decode_combos_2 ?(acc = 100) ?(total = 0) = function
         try int_of_string transformed
         with Failure _ -> 0 (* Handle non-integer strings *)
       in
-      let unwrapped_value = abs (value + acc) in
-      let times_passed_zero = unwrapped_value / 100 in
-      let modulated_value = unwrapped_value mod 100 in
-      match modulated_value with
-      | 0 when unwrapped_value = 0 || times_passed_zero = 0 ->
-          decode_combos_2 ~acc:0 ~total:(total + 1) body
-      | 0 -> decode_combos_2 ~acc:0 ~total:(total + times_passed_zero) body
-      | acc when times_passed_zero > 0 ->
-          decode_combos_2 ~acc ~total:(total + times_passed_zero) body
-      | acc -> decode_combos_2 ~acc ~total body)
+      let n_zeros = abs value / 100 in
+      let wrapped = abs (value + acc) mod 100 in
+      let () =
+        begin if wrapped = 0 then begin
+          (* print_int modulated; *)
+          (* print_endline " mod"; *)
+          (* print_int acc; *)
+          (* print_endline " acc"; *)
+          (* print_int value; *)
+          (* print_endline " value"; *)
+          (* print_int n_zeros; *)
+          (* print_int wrapped; *)
+          (* print_endline " zeroes wrapped" *)
+          Printf.printf "Zeroes: %d\tWrapped: %d\tAcc: %d\tValue: %d\n" n_zeros
+            wrapped acc value
+        end
+        end
+      in
+      match wrapped with
+      | 0 -> decode_combos_2 ~acc:wrapped ~total:(total + 1 + n_zeros) body
+      | acc -> decode_combos_2 ~acc ~total:(total + n_zeros) body)
 
 let () =
   let lines = read_lines "./data/input_a.txt" in
   let result_1 = decode_combos ~acc:50 lines in
   let result_2 = decode_combos_2 ~acc:50 lines in
   begin
-    print_endline ("Result 1: " ^ string_of_int result_1);
-    print_endline ("Result 2: " ^ string_of_int result_2)
+    print_endline ("Result 1: " ^ string_of_int result_1) (* 964 *);
+    print_endline ("Result 2: " ^ string_of_int result_2) (* 5872 *)
   end
