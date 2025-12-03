@@ -24,33 +24,26 @@ let rec decode_combos ?(acc = 100) ?(total = 0) = function
 
 let rec decode_combos_2 ?(acc = 100) ?(total = 0) = function
   | [] -> total
-  | head :: body -> (
+  | head :: body ->
       let transformed = String.map convert_dial_action_to_int_string head in
       let value =
         try int_of_string transformed
         with Failure _ -> 0 (* Handle non-integer strings *)
       in
-      let n_zeros = abs value / 100 in
-      let wrapped = abs (value + acc) mod 100 in
-      let () =
-        begin if wrapped = 0 then begin
-          (* print_int modulated; *)
-          (* print_endline " mod"; *)
-          (* print_int acc; *)
-          (* print_endline " acc"; *)
-          (* print_int value; *)
-          (* print_endline " value"; *)
-          (* print_int n_zeros; *)
-          (* print_int wrapped; *)
-          (* print_endline " zeroes wrapped" *)
-          Printf.printf "Zeroes: %d\tWrapped: %d\tAcc: %d\tValue: %d\n" n_zeros
-            wrapped acc value
-        end
-        end
+      (* let n_zeros = abs value / 100 in *)
+
+      let tmp =
+        match acc with
+        | a when value > 0 -> (a + value) / 100
+        | a when a > 0 -> (abs value - a) / 100
+        | _ -> max 0 (1 + ((abs value - 100) / 100))
       in
-      match wrapped with
-      | 0 -> decode_combos_2 ~acc:wrapped ~total:(total + 1 + n_zeros) body
-      | acc -> decode_combos_2 ~acc ~total:(total + n_zeros) body)
+      let wrapped = abs (value + acc) mod 100 in
+      decode_combos_2 ~acc:wrapped ~total:(total + tmp) body
+(* let () = Printf.printf "%d\n" tmp in *)
+(* match wrapped with *)
+(* | 0 -> decode_combos_2 ~acc:wrapped ~total:(total + 1 + n_zeros) body *)
+(* | acc -> decode_combos_2 ~acc ~total:(total + n_zeros) body) *)
 
 let () =
   let lines = read_lines "./data/input_a.txt" in
